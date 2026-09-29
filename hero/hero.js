@@ -9,38 +9,70 @@
 
     // Muted Color Palette
     const COLORS = ['#ffffff', '#60a5fa', '#22d3ee', '#f472b6', '#a78bfa', '#2dd4bf'];
-    const DOT_COUNT = 20;
+    let DOT_COUNT = window.innerWidth < 768 ? 15 : 25; // Reduce on mobile
 
     let width, height;
     let dots = [];
     let animationFrameId;
-    let phase = 'float'; // float, connect, unify, idle
+    let phase = 'pre-reveal'; // pre-reveal, explode, spread, connect, unify, idle
     let phaseTimer = 0;
 
-    // Animation Phases Duration (frames approx 60fps)
-    const PHASES = {
-        FLOAT: 120,    // 2 seconds float
-        CONNECT: 300,  // 5 seconds connecting
-        UNIFY: 180,    // 3 seconds fading to white
-        IDLE: -1       // Indefinite
-    };
+    // Elements for timing
+    const brandDot = container.querySelector('#brand-dot');
+
+    // Check first visit
+    const isFirstVisit = !sessionStorage.getItem('ac_intro_played');
 
     class Dot {
-        constructor(isFirst) {
-            this.x = Math.random() * width;
-            this.y = Math.random() * height;
-            // Slow idle motion
-            this.vx = (Math.random() - 0.5) * 0.3;
-            this.vy = (Math.random() - 0.5) * 0.3;
-            this.radius = 2 + Math.random(); // 2-3px
+        constructor(x, y, isFirst, isExploding = false) {
+            this.x = x !== null ? x : Math.random() * width;
+            this.y = y !== null ? y : Math.random() * height;
+
+            if (isExploding) {
+                // Outward burst velocity
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 1 + Math.random() * 3;
+                this.vx = Math.cos(angle) * speed;
+                this.vy = Math.sin(angle) * speed;
+            } else {
+                // Slow idle motion
+                this.vx = (Math.random() - 0.5) * 0.3;
+                this.vy = (Math.random() - 0.5) * 0.3;
+            }
+
+            this.radius = 1.5 + Math.random() * 1.5;
             this.baseColor = isFirst ? '#ffffff' : COLORS[Math.floor(Math.random() * (COLORS.length - 1)) + 1];
+
+            // Adjust alpha based on device capabilities (simulated via width here)
+            this.targetAlpha = 1;
+            this.alpha = isExploding ? 0 : 1;
             this.color = this.baseColor;
-            this.alpha = 1;
         }
 
         update() {
             this.x += this.vx;
             this.y += this.vy;
+
+            // Apply friction if exploding to slow down nicely
+            if (phase === 'explode' || phase === 'spread') {
+                this.vx *= 0.95;
+                this.vy *= 0.95;
+                if (this.alpha < this.targetAlpha) this.alpha += 0.05;
+
+                // Add a bit of organic drift
+                this.vx += (Math.random() - 0.5) * 0.1;
+                this.vy += (Math.random() - 0.5) * 0.1;
+            } else {
+                // Normal speed cap for idle
+                const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+                if (speed > 0.5) {
+                    this.vx *= 0.9;
+                    this.vy *= 0.9;
+                } else if (speed < 0.1) {
+                    this.vx += (Math.random() - 0.5) * 0.05;
+                    this.vy += (Math.random() - 0.5) * 0.05;
+                }
+            }
 
             // Soft bounce
             if (this.x < 0 || this.x > width) this.vx *= -1;
@@ -51,31 +83,102 @@
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
             ctx.fillStyle = this.color;
+            ctx.globalAlpha = this.alpha;
             ctx.fill();
+            ctx.globalAlpha = 1.0;
         }
     }
 
     function init() {
         resize();
-        dots = [];
-        for (let i = 0; i < DOT_COUNT; i++) {
-            dots.push(new Dot(i === 0));
+        window.addEventListener('resize', () => {
+            resize();
+            DOT_COUNT = window.innerWidth < 768 ? 15 : 25;
+        });
+
+        if (isFirstVisit) {
+            document.body.classList.add('intro-running');
+            try {
+                sessionStorage.setItem('ac_intro_played', 'true');
+            } catch (e) {
+                // Handle potential quota or privacy mode errors
+            }
+            runIntroSequence();
+        } else {
+            // Shorter sequence for returning visits
+            runFastSequence();
         }
-        window.addEventListener('resize', resize);
+    }
 
-        // Immediate Animation Start
-        animate();
+    function getDotPosition() {
+        if (!brandDot) return { x: width/2, y: height/2 };
+        const rect = brandDot.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+        return {
+            x: rect.left - containerRect.left + rect.width / 2,
+            y: rect.top - containerRect.top + rect.height / 2
+        };
+    }
 
-        // Independent Timing for Content Reveal
-        // 0.6s -> Brand Reveal Start
+    function runIntroSequence() {
+        // 0.0-0.4s -> ".ac" appears
+        brandName.classList.add('visible');
+
+        // 0.4-1.0s -> brand reveal
         setTimeout(() => {
-            if (brandName) brandName.classList.add('visible');
-        }, 600);
+            brandName.classList.add('reveal');
+        }, 400);
 
-        // 1.4s -> Tagline Reveal
+        // 0.8-1.5s -> dot splitting into particles
+        setTimeout(() => {
+            if (brandDot) brandDot.classList.add('hidden');
+            const pos = getDotPosition();
+            spawnParticles(pos.x, pos.y);
+            phase = 'explode';
+            animate();
+        }, 800);
+
+        // 1.2-2.0s -> particles spread and connect
+        setTimeout(() => {
+            phase = 'spread';
+        }, 1200);
+
+        // 1.8-2.5s -> homepage smoothly appears (header/cards)
+        // Handled globally via CSS or simply tagline reveal here
         setTimeout(() => {
             if (tagline) tagline.classList.add('visible');
-        }, 1400);
+            phase = 'connect';
+            // Trigger header and cards to fade in if they were hidden
+            document.body.classList.remove('intro-running');
+        }, 1800);
+
+        // 2.5-3.0s -> settles into subtle background
+        setTimeout(() => {
+            phase = 'idle';
+        }, 2800);
+    }
+
+    function runFastSequence() {
+        brandName.classList.add('visible');
+        brandName.classList.add('reveal');
+        if (tagline) tagline.classList.add('visible');
+        if (brandDot) brandDot.classList.add('hidden');
+
+        const pos = getDotPosition();
+        spawnParticles(pos.x, pos.y, false); // No explosion
+        phase = 'idle';
+        animate();
+    }
+
+    function spawnParticles(x, y, isExploding = true) {
+        dots = [];
+        for (let i = 0; i < DOT_COUNT; i++) {
+            if (isExploding) {
+                dots.push(new Dot(x, y, i === 0, true));
+            } else {
+                dots.push(new Dot(null, null, i === 0, false));
+            }
+        }
     }
 
     function resize() {
@@ -159,8 +262,11 @@
     // Prefers reduced motion
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReducedMotion) {
-        if (brandName) brandName.classList.add('visible');
+        brandName.classList.add('visible');
+        brandName.classList.add('reveal');
         if (tagline) tagline.classList.add('visible');
+        if (brandDot) brandDot.classList.add('hidden');
+        document.body.classList.remove('intro-running');
     } else {
         init();
     }

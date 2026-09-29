@@ -550,3 +550,23 @@ body {
 .sun.photo-edit:hover { border-color: #31a8ff; box-shadow: 0 0 15px rgba(49, 168, 255, 0.4); }
 .sun.video-edit:hover { border-color: #9999ff; box-shadow: 0 0 15px rgba(153, 153, 255, 0.4); }
 .sun.branding:hover { border-color: #ff9900; box-shadow: 0 0 15px rgba(255, 153, 0, 0.4); }
+
+/* Intro Animation Transitions */
+.header,
+.cards-section,
+.footer {
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+/* Intro Animation State */
+body.intro-running .header {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+body.intro-running .cards-section {
+    opacity: 0;
+    transform: translateY(20px);
+}
+body.intro-running .footer {
+    opacity: 0;
+}
