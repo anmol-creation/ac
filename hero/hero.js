@@ -9,16 +9,21 @@
 
     // Muted Color Palette
     const COLORS = ['#ffffff', '#60a5fa', '#22d3ee', '#f472b6', '#a78bfa', '#2dd4bf'];
-    let DOT_COUNT = window.innerWidth < 768 ? 15 : 25; // Reduce on mobile
+    const DOT_COUNT = 20;
 
     let width, height;
     let dots = [];
     let animationFrameId;
-    let phase = 'pre-reveal'; // pre-reveal, explode, spread, connect, unify, idle
+    let phase = 'intro'; // intro, explode, float, connect, unify, idle
     let phaseTimer = 0;
 
-    // Elements for timing
-    const brandDot = container.querySelector('#brand-dot');
+    // Animation Phases Duration (frames approx 60fps)
+    const PHASES = {
+        FLOAT: 120,    // 2 seconds float
+        CONNECT: 300,  // 5 seconds connecting
+        UNIFY: 180,    // 3 seconds fading to white
+        IDLE: -1       // Indefinite
+    };
 
     // Check first visit
     const isFirstVisit = !sessionStorage.getItem('ac_intro_played');
@@ -31,47 +36,35 @@
             if (isExploding) {
                 // Outward burst velocity
                 const angle = Math.random() * Math.PI * 2;
-                const speed = 1 + Math.random() * 3;
+                const speed = 1.5 + Math.random() * 4;
                 this.vx = Math.cos(angle) * speed;
                 this.vy = Math.sin(angle) * speed;
+                this.alpha = 0;
             } else {
                 // Slow idle motion
                 this.vx = (Math.random() - 0.5) * 0.3;
                 this.vy = (Math.random() - 0.5) * 0.3;
+                this.alpha = 1;
             }
 
-            this.radius = 1.5 + Math.random() * 1.5;
+            this.radius = 2 + Math.random(); // 2-3px
             this.baseColor = isFirst ? '#ffffff' : COLORS[Math.floor(Math.random() * (COLORS.length - 1)) + 1];
-
-            // Adjust alpha based on device capabilities (simulated via width here)
-            this.targetAlpha = 1;
-            this.alpha = isExploding ? 0 : 1;
             this.color = this.baseColor;
+            this.targetAlpha = 1;
         }
 
         update() {
             this.x += this.vx;
             this.y += this.vy;
 
-            // Apply friction if exploding to slow down nicely
-            if (phase === 'explode' || phase === 'spread') {
+            if (phase === 'explode') {
                 this.vx *= 0.95;
                 this.vy *= 0.95;
                 if (this.alpha < this.targetAlpha) this.alpha += 0.05;
 
-                // Add a bit of organic drift
+                // Drift
                 this.vx += (Math.random() - 0.5) * 0.1;
                 this.vy += (Math.random() - 0.5) * 0.1;
-            } else {
-                // Normal speed cap for idle
-                const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
-                if (speed > 0.5) {
-                    this.vx *= 0.9;
-                    this.vy *= 0.9;
-                } else if (speed < 0.1) {
-                    this.vx += (Math.random() - 0.5) * 0.05;
-                    this.vy += (Math.random() - 0.5) * 0.05;
-                }
             }
 
             // Soft bounce
@@ -91,93 +84,89 @@
 
     function init() {
         resize();
-        window.addEventListener('resize', () => {
-            resize();
-            DOT_COUNT = window.innerWidth < 768 ? 15 : 25;
-        });
+        window.addEventListener('resize', resize);
 
-        if (isFirstVisit) {
-            document.body.classList.add('intro-running');
-            try {
-                sessionStorage.setItem('ac_intro_played', 'true');
-            } catch (e) {
-                // Handle potential quota or privacy mode errors
-            }
-            runIntroSequence();
+        // Hide initial content if first visit
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        if (isFirstVisit && !prefersReducedMotion) {
+            try { sessionStorage.setItem('ac_intro_played', 'true'); } catch(e) {}
+
+            // Build dynamic overlay
+            const overlay = document.createElement('div');
+            overlay.id = 'intro-overlay';
+            overlay.innerHTML = `
+                <h1 class="intro-brand-name" id="intro-brand">
+                    <span class="intro-brand-dot" id="intro-dot">.</span><span class="intro-brand-a">a</span><span class="intro-brand-nmol">nmol</span><span class="intro-brand-c">c</span><span class="intro-brand-reations">reations</span>
+                </h1>
+            `;
+            document.body.appendChild(overlay);
+
+            // Initially hide real content to avoid flash
+            if (brandName) brandName.style.opacity = '0';
+            if (tagline) tagline.style.opacity = '0';
+
+            // Start the sequence
+            runIntroSequence(overlay);
         } else {
-            // Shorter sequence for returning visits
-            runFastSequence();
+            // Standard start (skip intro)
+            spawnParticles(null, null, false);
+            phase = 'float';
+            animate();
+
+            setTimeout(() => { if (brandName) brandName.classList.add('visible'); }, 600);
+            setTimeout(() => { if (tagline) tagline.classList.add('visible'); }, 1400);
         }
     }
 
-    function getDotPosition() {
-        if (!brandDot) return { x: width/2, y: height/2 };
-        const rect = brandDot.getBoundingClientRect();
-        const containerRect = container.getBoundingClientRect();
-        return {
-            x: rect.left - containerRect.left + rect.width / 2,
-            y: rect.top - containerRect.top + rect.height / 2
-        };
-    }
+    function runIntroSequence(overlay) {
+        const introBrand = document.getElementById('intro-brand');
+        const introDot = document.getElementById('intro-dot');
 
-    function runIntroSequence() {
-        // 0.0-0.4s -> ".ac" appears
-        brandName.classList.add('visible');
-
-        // 0.4-1.0s -> brand reveal
-        setTimeout(() => {
-            brandName.classList.add('reveal');
-        }, 400);
-
-        // 0.8-1.5s -> dot splitting into particles
-        setTimeout(() => {
-            if (brandDot) brandDot.classList.add('hidden');
-            const pos = getDotPosition();
-            spawnParticles(pos.x, pos.y);
-            phase = 'explode';
-            animate();
-        }, 800);
-
-        // 1.2-2.0s -> particles spread and connect
-        setTimeout(() => {
-            phase = 'spread';
-        }, 1200);
-
-        // 1.8-2.5s -> homepage smoothly appears (header/cards)
-        // Handled globally via CSS or simply tagline reveal here
-        setTimeout(() => {
-            if (tagline) tagline.classList.add('visible');
-            phase = 'connect';
-            // Trigger header and cards to fade in if they were hidden
-            document.body.classList.remove('intro-running');
-        }, 1800);
-
-        // 2.5-3.0s -> settles into subtle background
-        setTimeout(() => {
-            phase = 'idle';
-        }, 2800);
-    }
-
-    function runFastSequence() {
-        brandName.classList.add('visible');
-        brandName.classList.add('reveal');
-        if (tagline) tagline.classList.add('visible');
-        if (brandDot) brandDot.classList.add('hidden');
-
-        const pos = getDotPosition();
-        spawnParticles(pos.x, pos.y, false); // No explosion
-        phase = 'idle';
+        // Let canvas be empty initially
         animate();
+
+        // 0.5s -> slow expansion
+        setTimeout(() => {
+            introBrand.classList.add('reveal');
+        }, 500);
+
+        // 2.0s -> dot explodes
+        setTimeout(() => {
+            introDot.classList.add('hidden');
+            const rect = introDot.getBoundingClientRect();
+            spawnParticles(rect.left + rect.width/2, rect.top + rect.height/2, true);
+            phase = 'explode';
+        }, 2000);
+
+        // 3.5s -> transition to main content
+        setTimeout(() => {
+            phase = 'float';
+            overlay.classList.add('hidden');
+
+            // Reveal real content
+            if (brandName) {
+                brandName.style.opacity = '';
+                brandName.classList.add('visible');
+            }
+            if (tagline) {
+                tagline.style.opacity = '';
+                tagline.classList.add('visible');
+            }
+        }, 3500);
+
+        // 4.5s -> remove overlay
+        setTimeout(() => {
+            if (overlay.parentNode) {
+                overlay.parentNode.removeChild(overlay);
+            }
+        }, 4500);
     }
 
-    function spawnParticles(x, y, isExploding = true) {
+    function spawnParticles(x, y, isExploding) {
         dots = [];
         for (let i = 0; i < DOT_COUNT; i++) {
-            if (isExploding) {
-                dots.push(new Dot(x, y, i === 0, true));
-            } else {
-                dots.push(new Dot(null, null, i === 0, false));
-            }
+            dots.push(new Dot(x, y, i === 0, isExploding));
         }
     }
 
@@ -262,11 +251,8 @@
     // Prefers reduced motion
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReducedMotion) {
-        brandName.classList.add('visible');
-        brandName.classList.add('reveal');
+        if (brandName) brandName.classList.add('visible');
         if (tagline) tagline.classList.add('visible');
-        if (brandDot) brandDot.classList.add('hidden');
-        document.body.classList.remove('intro-running');
     } else {
         init();
     }
