@@ -11,8 +11,21 @@
     align-items: center;
     overflow: hidden;
     background-color: #111111; /* Always dark as per strict rule */
+    background: radial-gradient(circle at center, #1a1a1a 0%, #111111 100%);
     color: #ffffff;
     font-family: 'Inter', sans-serif;
+}
+
+#hero-container::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 150px;
+    background: linear-gradient(to top, var(--bg-color) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 1;
 }
 
 #hero-canvas {
@@ -41,8 +54,8 @@
     color: #ffffff; /* Locked white */
     margin: 0;
     opacity: 0; /* Initial state for reveal */
-    transform: translateY(10px);
-    transition: opacity 0.4s ease-out, transform 0.4s ease-out; /* Adjusted for timing: Start 0.6 + 0.4 = 1.0s */
+    transform: translateY(20px);
+    transition: opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
     pointer-events: auto;
 }
 
@@ -58,9 +71,8 @@
     color: #e0e0e0; /* Slightly muted white */
     margin-top: 1rem;
     opacity: 0; /* Initial state for reveal */
-    transform: translateY(10px);
-    transition: opacity 1s ease-out, transform 1s ease-out;
-    /* No delay here, handled by JS timeout */
+    transform: translateY(20px);
+    transition: opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s, transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s;
     pointer-events: auto;
 }
 
@@ -83,64 +95,4 @@
         font-size: 1rem;
         line-height: 1.5;
     }
-}
-
-/* Overlay for Intro Animation */
-#intro-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: #111111;
-    z-index: 9999;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    pointer-events: none;
-    transition: opacity 1s ease-out;
-}
-
-#intro-overlay.hidden {
-    opacity: 0;
-}
-
-.intro-brand-name {
-    font-size: 3.5rem;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    color: #ffffff;
-    margin: 0;
-    display: inline-flex;
-    align-items: baseline;
-    justify-content: center;
-}
-
-.intro-brand-nmol, .intro-brand-reations {
-    display: inline-block;
-    max-width: 0;
-    opacity: 0;
-    overflow: hidden;
-    vertical-align: bottom;
-    transition: max-width 1.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.2s ease;
-}
-
-.intro-brand-name.reveal .intro-brand-nmol {
-    max-width: 4em;
-    opacity: 1;
-}
-
-.intro-brand-name.reveal .intro-brand-reations {
-    max-width: 6em;
-    opacity: 1;
-}
-
-.intro-brand-dot {
-    display: inline-block;
-    opacity: 1;
-    transition: opacity 0.2s ease;
-}
-
-.intro-brand-dot.hidden {
-    opacity: 0;
 }

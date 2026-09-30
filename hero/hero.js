@@ -14,7 +14,7 @@
     let width, height;
     let dots = [];
     let animationFrameId;
-    let phase = 'intro'; // intro, explode, float, connect, unify, idle
+    let phase = 'float'; // float, connect, unify, idle
     let phaseTimer = 0;
 
     // Animation Phases Duration (frames approx 60fps)
@@ -25,149 +25,114 @@
         IDLE: -1       // Indefinite
     };
 
-    // Check first visit
-    const isFirstVisit = !sessionStorage.getItem('ac_intro_played');
+    // Mouse Interaction for Parallax
+    let mouseX = 0;
+    let mouseY = 0;
+    let targetMouseX = 0;
+    let targetMouseY = 0;
+
+    // Parallax strength
+    const PARALLAX_FACTOR = 0.02;
+
+    container.addEventListener('mousemove', (e) => {
+        const rect = container.getBoundingClientRect();
+        targetMouseX = e.clientX - rect.left - (width / 2);
+        targetMouseY = e.clientY - rect.top - (height / 2);
+    });
+
+    container.addEventListener('mouseleave', () => {
+        targetMouseX = 0;
+        targetMouseY = 0;
+    });
+
+    // Ripple effect on click
+    let ripples = [];
+
+    container.addEventListener('click', (e) => {
+        const rect = container.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const clickY = e.clientY - rect.top;
+
+        ripples.push({
+            x: clickX,
+            y: clickY,
+            radius: 0,
+            alpha: 1
+        });
+
+        // Repel dots
+        dots.forEach(dot => {
+            const dx = dot.x - clickX;
+            const dy = dot.y - clickY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < 200) {
+                const force = (200 - dist) / 200;
+                dot.vx += (dx / dist) * force * 5;
+                dot.vy += (dy / dist) * force * 5;
+            }
+        });
+    });
 
     class Dot {
-        constructor(x, y, isFirst, isExploding = false) {
-            this.x = x !== null ? x : Math.random() * width;
-            this.y = y !== null ? y : Math.random() * height;
-
-            if (isExploding) {
-                // Outward burst velocity
-                const angle = Math.random() * Math.PI * 2;
-                const speed = 1.5 + Math.random() * 4;
-                this.vx = Math.cos(angle) * speed;
-                this.vy = Math.sin(angle) * speed;
-                this.alpha = 0;
-            } else {
-                // Slow idle motion
-                this.vx = (Math.random() - 0.5) * 0.3;
-                this.vy = (Math.random() - 0.5) * 0.3;
-                this.alpha = 1;
-            }
-
-            this.radius = 2 + Math.random(); // 2-3px
+        constructor(isFirst) {
+            this.baseX = Math.random() * width;
+            this.baseY = Math.random() * height;
+            this.x = this.baseX;
+            this.y = this.baseY;
+            // Depth for parallax effect (closer dots move more)
+            this.z = Math.random() * 2 + 0.1;
+            // Slow idle motion
+            this.vx = (Math.random() - 0.5) * 0.3;
+            this.vy = (Math.random() - 0.5) * 0.3;
+            this.radius = (2 + Math.random()) * (this.z * 0.5 + 0.5); // size relative to depth
             this.baseColor = isFirst ? '#ffffff' : COLORS[Math.floor(Math.random() * (COLORS.length - 1)) + 1];
             this.color = this.baseColor;
-            this.targetAlpha = 1;
+            this.alpha = 1;
         }
 
         update() {
-            this.x += this.vx;
-            this.y += this.vy;
+            this.baseX += this.vx;
+            this.baseY += this.vy;
 
-            if (phase === 'explode') {
-                this.vx *= 0.95;
-                this.vy *= 0.95;
-                if (this.alpha < this.targetAlpha) this.alpha += 0.05;
+            // Soft bounce based on base coordinates
+            if (this.baseX < 0 || this.baseX > width) this.vx *= -1;
+            if (this.baseY < 0 || this.baseY > height) this.vy *= -1;
 
-                // Drift
-                this.vx += (Math.random() - 0.5) * 0.1;
-                this.vy += (Math.random() - 0.5) * 0.1;
-            }
-
-            // Soft bounce
-            if (this.x < 0 || this.x > width) this.vx *= -1;
-            if (this.y < 0 || this.y > height) this.vy *= -1;
+            // Apply parallax offset
+            this.x = this.baseX + (mouseX * PARALLAX_FACTOR * this.z);
+            this.y = this.baseY + (mouseY * PARALLAX_FACTOR * this.z);
         }
 
         draw(ctx) {
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
             ctx.fillStyle = this.color;
-            ctx.globalAlpha = this.alpha;
             ctx.fill();
-            ctx.globalAlpha = 1.0;
         }
     }
 
     function init() {
         resize();
-        window.addEventListener('resize', resize);
-
-        // Hide initial content if first visit
-        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-        if (isFirstVisit && !prefersReducedMotion) {
-            try { sessionStorage.setItem('ac_intro_played', 'true'); } catch(e) {}
-
-            // Build dynamic overlay
-            const overlay = document.createElement('div');
-            overlay.id = 'intro-overlay';
-            overlay.innerHTML = `
-                <h1 class="intro-brand-name" id="intro-brand">
-                    <span class="intro-brand-dot" id="intro-dot">.</span><span class="intro-brand-a">a</span><span class="intro-brand-nmol">nmol</span><span class="intro-brand-c">c</span><span class="intro-brand-reations">reations</span>
-                </h1>
-            `;
-            document.body.appendChild(overlay);
-
-            // Initially hide real content to avoid flash
-            if (brandName) brandName.style.opacity = '0';
-            if (tagline) tagline.style.opacity = '0';
-
-            // Start the sequence
-            runIntroSequence(overlay);
-        } else {
-            // Standard start (skip intro)
-            spawnParticles(null, null, false);
-            phase = 'float';
-            animate();
-
-            setTimeout(() => { if (brandName) brandName.classList.add('visible'); }, 600);
-            setTimeout(() => { if (tagline) tagline.classList.add('visible'); }, 1400);
-        }
-    }
-
-    function runIntroSequence(overlay) {
-        const introBrand = document.getElementById('intro-brand');
-        const introDot = document.getElementById('intro-dot');
-
-        // Let canvas be empty initially
-        animate();
-
-        // 0.5s -> slow expansion
-        setTimeout(() => {
-            introBrand.classList.add('reveal');
-        }, 500);
-
-        // 2.0s -> dot explodes
-        setTimeout(() => {
-            introDot.classList.add('hidden');
-            const rect = introDot.getBoundingClientRect();
-            spawnParticles(rect.left + rect.width/2, rect.top + rect.height/2, true);
-            phase = 'explode';
-        }, 2000);
-
-        // 3.5s -> transition to main content
-        setTimeout(() => {
-            phase = 'float';
-            overlay.classList.add('hidden');
-
-            // Reveal real content
-            if (brandName) {
-                brandName.style.opacity = '';
-                brandName.classList.add('visible');
-            }
-            if (tagline) {
-                tagline.style.opacity = '';
-                tagline.classList.add('visible');
-            }
-        }, 3500);
-
-        // 4.5s -> remove overlay
-        setTimeout(() => {
-            if (overlay.parentNode) {
-                overlay.parentNode.removeChild(overlay);
-            }
-        }, 4500);
-    }
-
-    function spawnParticles(x, y, isExploding) {
         dots = [];
         for (let i = 0; i < DOT_COUNT; i++) {
-            dots.push(new Dot(x, y, i === 0, isExploding));
+            dots.push(new Dot(i === 0));
         }
+        window.addEventListener('resize', resize);
+
+        // Immediate Animation Start
+        animate();
+
+        // Independent Timing for Content Reveal
+        // 0.6s -> Brand Reveal Start
+        setTimeout(() => {
+            if (brandName) brandName.classList.add('visible');
+        }, 600);
+
+        // 1.4s -> Tagline Reveal
+        setTimeout(() => {
+            if (tagline) tagline.classList.add('visible');
+        }, 1400);
     }
 
     function resize() {
@@ -179,6 +144,10 @@
 
     function animate() {
         ctx.clearRect(0, 0, width, height);
+
+        // Smooth mouse following for parallax
+        mouseX += (targetMouseX - mouseX) * 0.1;
+        mouseY += (targetMouseY - mouseY) * 0.1;
 
         // Update Phase
         if (phase !== 'idle') {
@@ -195,8 +164,33 @@
             }
         }
 
+        // Draw Ripples
+        for (let i = ripples.length - 1; i >= 0; i--) {
+            let r = ripples[i];
+            r.radius += 5;
+            r.alpha -= 0.02;
+
+            if (r.alpha <= 0) {
+                ripples.splice(i, 1);
+                continue;
+            }
+
+            ctx.beginPath();
+            ctx.arc(r.x, r.y, r.radius, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(255, 255, 255, ${r.alpha * 0.5})`;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
         // Draw Dots
         dots.forEach(dot => {
+            // Apply friction to velocity so repelled dots slow down and return to base speed
+            const speed = Math.sqrt(dot.vx * dot.vx + dot.vy * dot.vy);
+            if (speed > 1) {
+                dot.vx *= 0.95;
+                dot.vy *= 0.95;
+            }
+
             dot.update();
 
             // Handle Color Unification

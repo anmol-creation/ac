@@ -11,6 +11,25 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
+        /* Base styles for scroll animations added directly to document to prevent flash */
+        .reveal-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+            will-change: opacity, transform;
+        }
+        .reveal-up.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .reveal-up {
+                opacity: 1;
+                transform: none;
+                transition: none;
+            }
+        }
+
         /* Specific styles for About page */
         .about-hero {
             background-color: #111111;
@@ -523,6 +542,10 @@
 </head>
 <body>
 
+    <!-- Custom Cursor (Desktop Only) -->
+    <div class="custom-cursor" id="custom-cursor"></div>
+    <div class="custom-cursor-follower" id="custom-cursor-follower"></div>
+
     <header class="header">
         <div class="container header-content" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
             <a href="index.html" class="brand-logo">.ac</a>
@@ -550,7 +573,7 @@
 
     <main>
         <!-- About Hero Section -->
-        <section class="about-hero">
+        <section class="about-hero reveal-up">
             <div class="container">
                 <div class="about-hero-content">
                     <span class="about-hero-greeting">Hi, This is</span>
@@ -563,30 +586,30 @@
 
                     <div class="hero-social-links">
                         <div class="hero-social-row" aria-label="Contact and Professional">
-                            <a href="#" target="_blank" class="hero-social-link" aria-label="Email">
+                            <a href="#" target="_blank" class="hero-social-link hover-trigger" aria-label="Email">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
                             </a>
-                            <a href="#" target="_blank" class="hero-social-link" aria-label="WhatsApp">
+                            <a href="#" target="_blank" class="hero-social-link hover-trigger" aria-label="WhatsApp">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21"></path><path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1a5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1"></path></svg>
                             </a>
-                            <a href="#" target="_blank" class="hero-social-link" aria-label="LinkedIn">
+                            <a href="#" target="_blank" class="hero-social-link hover-trigger" aria-label="LinkedIn">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
                             </a>
-                            <a href="#" target="_blank" class="hero-social-link" aria-label="Fiverr">
+                            <a href="#" target="_blank" class="hero-social-link hover-trigger" aria-label="Fiverr">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 8.2V5.5c0-.8-.7-1.5-1.5-1.5h-11C5.7 4 5 4.7 5 5.5V8"></path><path d="M5 8v12h14V8"></path><path d="M12 12v3"></path><path d="M15 12v3"></path><path d="M9 12v3"></path></svg>
                             </a>
                         </div>
                         <div class="hero-social-row" aria-label="Social Media">
-                            <a href="https://www.instagram.com/anmolcreations_fl?igsh=MmpyNHh0NzY3anVs" target="_blank" class="hero-social-link" aria-label="Instagram">
+                            <a href="https://www.instagram.com/anmolcreations_fl?igsh=MmpyNHh0NzY3anVs" target="_blank" class="hero-social-link hover-trigger" aria-label="Instagram">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
                             </a>
-                            <a href="https://www.facebook.com/share/1HAwn9qVpn/" target="_blank" class="hero-social-link" aria-label="Facebook">
+                            <a href="https://www.facebook.com/share/1HAwn9qVpn/" target="_blank" class="hero-social-link hover-trigger" aria-label="Facebook">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
                             </a>
-                            <a href="https://pin.it/407kXVCkB" target="_blank" class="hero-social-link" aria-label="Pinterest">
+                            <a href="https://pin.it/407kXVCkB" target="_blank" class="hero-social-link hover-trigger" aria-label="Pinterest">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="12" x2="12" y2="22"></line><path d="M12 2a6 6 0 0 0-6 6c0 2 1.5 3 1.5 3s.2.5-.5 1.5c-1 1.5-2.5 2-2.5 2a8 8 0 1 1 16 0c0 4-3 7-6 7-2 0-3.5-1-3.5-1"></path></svg>
                             </a>
-                            <a href="#" target="_blank" class="hero-social-link" aria-label="YouTube">
+                            <a href="#" target="_blank" class="hero-social-link hover-trigger" aria-label="YouTube">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"/><path d="m10 15 5-3-5-3z"/></svg>
                             </a>
                         </div>
@@ -601,7 +624,7 @@
         </section>
 
         <!-- Horizontal Journey Section -->
-        <section class="horizontal-timeline-section">
+        <section class="horizontal-timeline-section reveal-up">
             <div class="horizontal-timeline-header">
                 <h2 class="horizontal-timeline-title"><i data-lucide="map"></i> My Journey</h2>
             </div>
@@ -744,7 +767,7 @@
             </div>
 
 
-            <div class="container accordion-container" style="margin-top: 4rem; max-width: 1000px;">
+            <div class="container accordion-container reveal-up" style="margin-top: 4rem; max-width: 1000px;">
                 <h2 class="horizontal-timeline-title" style="margin-bottom: 2rem;"><i data-lucide="cpu"></i> Skills & Expertise</h2>
 
                 <div class="marquee-wrapper" style="padding: 3rem 0; overflow: hidden; position: relative;">
@@ -758,7 +781,7 @@
                                     <div class="planet"><div class="planet-content" title="JavaScript"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-original.svg" alt="JS"></div></div>
                                     <div class="planet"><div class="planet-content" title="React"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/react/react-original.svg" alt="React"></div></div>
                                 </div>
-                                <div class="sun web-dev">
+                                <div class="sun web-dev hover-trigger">
                                     <i data-lucide="code" style="color: #61dafb;"></i>
                                     <span>Web Dev</span>
                                 </div>
@@ -772,7 +795,7 @@
                                     <div class="planet"><div class="planet-content" style="font-size: 0.55rem; line-height: 1.1;">User<br>Flow</div></div>
                                     <div class="planet"><div class="planet-content" title="Figma"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/figma/figma-original.svg" alt="Figma"></div></div>
                                 </div>
-                                <div class="sun ui-ux">
+                                <div class="sun ui-ux hover-trigger">
                                     <i data-lucide="palette" style="color: #f24e1e;"></i>
                                     <span>UI/UX</span>
                                 </div>
@@ -786,7 +809,7 @@
                                     <div class="planet"><div class="planet-content" style="font-size: 0.55rem; line-height: 1.1;">Cut<br>out</div></div>
                                     <div class="planet"><div class="planet-content" title="Photoshop"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/photoshop/photoshop-original.svg" alt="Photoshop"></div></div>
                                 </div>
-                                <div class="sun photo-edit">
+                                <div class="sun photo-edit hover-trigger">
                                     <i data-lucide="camera" style="color: #31a8ff;"></i>
                                     <span>Photo Edit</span>
                                 </div>
@@ -901,7 +924,7 @@
 
 
             <!-- Tool Expertise -->
-            <div class="container accordion-container" style="margin-top: 4rem;">
+            <div class="container accordion-container reveal-up" style="margin-top: 4rem;">
                 <h2 class="horizontal-timeline-title" style="margin-bottom: 2rem;"><i data-lucide="wrench"></i> Tool Expertise</h2>
                 <div class="horizontal-timeline-wrapper">
                     <div class="horizontal-timeline-track">
@@ -934,7 +957,7 @@
             </div>
 
             <!-- AI Tools Expertise -->
-            <div class="container accordion-container" style="margin-top: 4rem;">
+            <div class="container accordion-container reveal-up" style="margin-top: 4rem;">
                 <h2 class="horizontal-timeline-title" style="margin-bottom: 2rem;"><i data-lucide="bot"></i> AI Tools Expertise</h2>
                 <div class="horizontal-timeline-wrapper">
                     <div class="horizontal-timeline-track">
@@ -967,7 +990,7 @@
             </div>
 
             <!-- Hobbies & Interests -->
-            <div class="container accordion-container" style="margin-top: 4rem;">
+            <div class="container accordion-container reveal-up" style="margin-top: 4rem;">
                 <h2 class="horizontal-timeline-title" style="margin-bottom: 2rem;"><i data-lucide="heart"></i> Hobbies & Interests</h2>
                 <div class="horizontal-timeline-wrapper">
                     <div class="horizontal-timeline-track">
@@ -1025,7 +1048,7 @@
             </div>
 
             <!-- Languages & Core Values -->
-            <div class="container accordion-container" style="margin-top: 4rem;">
+            <div class="container accordion-container reveal-up" style="margin-top: 4rem;">
                 <h2 class="horizontal-timeline-title" style="margin-bottom: 2rem;"><i data-lucide="globe"></i> Languages & Core Values</h2>
                 <div class="horizontal-timeline-wrapper">
                     <div class="horizontal-timeline-track">

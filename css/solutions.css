@@ -103,12 +103,16 @@
     align-items: center;
     background: none;
     border: none;
-    cursor: pointer;
+    cursor: pointer; /* Fallback */
     text-align: left;
     color: var(--text-main);
     font-size: 1.1rem;
     font-weight: 500;
     transition: background-color 0.2s ease;
+}
+
+body.custom-cursor-active .accordion-header {
+    cursor: none;
 }
 
 .accordion-header:hover {
