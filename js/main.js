@@ -74,7 +74,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Custom Cursor Logic (Desktop Only)
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 1024;
+    // Use pointer-fine to detect true mouse users (desktop) rather than guessing by screen width or user agent string
+    const isDesktop = window.matchMedia("(pointer: fine)").matches;
+    const isMobile = !isDesktop;
 
     // Interactive Card Glow & 3D Tilt Effect
     const cards = document.querySelectorAll('.card');
