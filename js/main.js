@@ -81,6 +81,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Interactive Card Glow & 3D Tilt Effect
     const cards = document.querySelectorAll('.card');
     cards.forEach(card => {
+        card.addEventListener('mouseenter', () => {
+            if (!isMobile && !prefersReducedMotion) {
+                card.classList.add('is-tilting');
+            }
+        });
+
         card.addEventListener('mousemove', (e) => {
             const rect = card.getBoundingClientRect();
             const x = e.clientX - rect.left;
@@ -92,7 +98,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 3D Tilt effect (desktop only)
             if (!isMobile && !prefersReducedMotion) {
-                card.classList.add('is-tilting');
                 const centerX = rect.width / 2;
                 const centerY = rect.height / 2;
 
@@ -109,7 +114,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!isMobile && !prefersReducedMotion) {
                 card.style.setProperty('--rx', `0deg`);
                 card.style.setProperty('--ry', `0deg`);
-                card.classList.remove('is-tilting');
+                // Use a short timeout to let the card ease back before removing the class
+                setTimeout(() => {
+                    card.classList.remove('is-tilting');
+                }, 100);
             }
         });
     });
@@ -124,11 +132,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const y = e.clientY - rect.top - rect.height / 2;
 
                 // Move element towards cursor (strength 0.3)
-                el.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px)`;
+                el.style.transform = `translate3d(${x * 0.3}px, ${y * 0.3}px, 0)`;
             });
 
             el.addEventListener('mouseleave', () => {
-                el.style.transform = `translate(0px, 0px)`;
+                el.style.transform = `translate3d(0px, 0px, 0)`;
             });
         });
     }
@@ -158,9 +166,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 mouseX = e.clientX;
                 mouseY = e.clientY;
 
-                // Immediate update for dot
-                cursor.style.left = `${mouseX}px`;
-                cursor.style.top = `${mouseY}px`;
+                // Immediate update for dot using translate3d for GPU acceleration
+                cursor.style.transform = `translate3d(calc(${mouseX}px - 50%), calc(${mouseY}px - 50%), 0)`;
             });
 
             // Lerp function for smooth following
@@ -170,8 +177,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 followerX = lerp(followerX, mouseX, 0.15);
                 followerY = lerp(followerY, mouseY, 0.15);
 
-                cursorFollower.style.left = `${followerX}px`;
-                cursorFollower.style.top = `${followerY}px`;
+                // Update follower using translate3d for GPU acceleration
+                cursorFollower.style.transform = `translate3d(calc(${followerX}px - 50%), calc(${followerY}px - 50%), 0)`;
 
                 requestAnimationFrame(animateCursor);
             };
