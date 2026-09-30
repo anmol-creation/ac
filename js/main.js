@@ -21,12 +21,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateIcons(theme) {
+        // Smooth toggle transition using transforms/opacity instead of display: none
         if (theme === 'dark') {
-            iconSun.style.display = 'block';
-            iconMoon.style.display = 'none';
+            iconSun.style.opacity = '1';
+            iconSun.style.transform = 'rotate(0deg) scale(1)';
+            iconMoon.style.opacity = '0';
+            iconMoon.style.transform = 'rotate(90deg) scale(0)';
         } else {
-            iconSun.style.display = 'none';
-            iconMoon.style.display = 'block';
+            iconSun.style.opacity = '0';
+            iconSun.style.transform = 'rotate(-90deg) scale(0)';
+            iconMoon.style.opacity = '1';
+            iconMoon.style.transform = 'rotate(0deg) scale(1)';
         }
     }
 
@@ -68,7 +73,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Interactive Card Glow Effect
+    // Custom Cursor Logic (Desktop Only)
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 1024;
+
+    // Interactive Card Glow & 3D Tilt Effect
     const cards = document.querySelectorAll('.card');
     cards.forEach(card => {
         card.addEventListener('mousemove', (e) => {
@@ -76,13 +84,55 @@ document.addEventListener('DOMContentLoaded', () => {
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
 
+            // Glow effect
             card.style.setProperty('--mouse-x', `${x}px`);
             card.style.setProperty('--mouse-y', `${y}px`);
+
+            // 3D Tilt effect (desktop only)
+            if (!isMobile && !prefersReducedMotion) {
+                card.classList.add('is-tilting');
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+
+                // Calculate rotation (max 4 degrees)
+                const rotateX = ((y - centerY) / centerY) * -4;
+                const rotateY = ((x - centerX) / centerX) * 4;
+
+                card.style.setProperty('--rx', `${rotateX}deg`);
+                card.style.setProperty('--ry', `${rotateY}deg`);
+            }
+        });
+
+        card.addEventListener('mouseleave', () => {
+            if (!isMobile && !prefersReducedMotion) {
+                card.style.setProperty('--rx', `0deg`);
+                card.style.setProperty('--ry', `0deg`);
+                card.classList.remove('is-tilting');
+            }
         });
     });
 
-    // Custom Cursor Logic (Desktop Only)
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 1024;
+    // Magnetic elements (Desktop Only)
+    if (!isMobile && !prefersReducedMotion) {
+        const magneticElements = document.querySelectorAll('.theme-toggle, .menu-toggle, .brand-logo');
+        magneticElements.forEach(el => {
+            el.addEventListener('mousemove', (e) => {
+                const rect = el.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+
+                // Move element towards cursor (strength 0.3)
+                el.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px)`;
+            });
+
+            el.addEventListener('mouseleave', () => {
+                el.style.transform = `translate(0px, 0px)`;
+            });
+        });
+    }
+
+    // Custom Cursor Setup
+
 
     if (!isMobile && !prefersReducedMotion) {
         const cursor = document.getElementById('custom-cursor');

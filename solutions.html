@@ -9,8 +9,33 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* Base styles for scroll animations added directly to document to prevent flash */
+        .reveal-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+            will-change: opacity, transform;
+        }
+        .reveal-up.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .reveal-up {
+                opacity: 1;
+                transform: none;
+                transition: none;
+            }
+        }
+    </style>
 </head>
 <body>
+
+    <!-- Custom Cursor (Desktop Only) -->
+    <div class="custom-cursor" id="custom-cursor"></div>
+    <div class="custom-cursor-follower" id="custom-cursor-follower"></div>
+
     <header class="header">
         <div class="container header-content" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
             <a href="index.html" class="brand-logo">.ac</a>
@@ -38,27 +63,27 @@
 
     <main>
         <!-- Page Header & Nav -->
-        <section class="solutions-header">
+        <section class="solutions-header reveal-up">
             <div class="container">
                 <h1 class="solutions-title">Online Digital Solutions</h1>
                 <p class="solutions-subtitle">Brand: AnmolCreations – Online Digital Solutions</p>
 
                 <div class="nav-buttons-container">
-                    <a href="#internet-services" class="nav-btn">Internet Services</a>
-                    <a href="#design-studio" class="nav-btn">Design Studio</a>
+                    <a href="#internet-services" class="nav-btn hover-trigger">Internet Services</a>
+                    <a href="#design-studio" class="nav-btn hover-trigger">Design Studio</a>
                 </div>
             </div>
         </section>
 
         <!-- Section 1: Internet Services -->
-        <section id="internet-services" class="services-section">
+        <section id="internet-services" class="services-section reveal-up">
             <div class="container">
                 <h2 class="section-title">Internet Services</h2>
 
                 <div class="accordion">
                     <!-- Gov & Identity -->
                     <div class="accordion-item">
-                        <button class="accordion-header">
+                        <button class="accordion-header hover-trigger">
                             <span>Gov & Identity</span>
                             <svg class="accordion-icon" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg>
                         </button>
@@ -74,7 +99,7 @@
 
                     <!-- Banking & Finance -->
                     <div class="accordion-item">
-                        <button class="accordion-header">
+                        <button class="accordion-header hover-trigger">
                             <span>Banking & Finance</span>
                             <svg class="accordion-icon" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg>
                         </button>
@@ -90,7 +115,7 @@
 
                     <!-- Online Forms & Applications -->
                     <div class="accordion-item">
-                        <button class="accordion-header">
+                        <button class="accordion-header hover-trigger">
                             <span>Online Forms & Applications</span>
                             <svg class="accordion-icon" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg>
                         </button>
@@ -106,7 +131,7 @@
 
                     <!-- Documents & Office Work -->
                     <div class="accordion-item">
-                        <button class="accordion-header">
+                        <button class="accordion-header hover-trigger">
                             <span>Documents & Office Work</span>
                             <svg class="accordion-icon" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg>
                         </button>
@@ -121,7 +146,7 @@
 
                     <!-- Student Services -->
                     <div class="accordion-item">
-                        <button class="accordion-header">
+                        <button class="accordion-header hover-trigger">
                             <span>Student Services</span>
                             <svg class="accordion-icon" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg>
                         </button>
@@ -136,7 +161,7 @@
 
                     <!-- Website & Online Presence -->
                     <div class="accordion-item">
-                        <button class="accordion-header">
+                        <button class="accordion-header hover-trigger">
                             <span>Website & Online Presence</span>
                             <svg class="accordion-icon" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg>
                         </button>
@@ -153,14 +178,14 @@
         </section>
 
         <!-- Section 2: Design Studio -->
-        <section id="design-studio" class="services-section">
+        <section id="design-studio" class="services-section reveal-up">
             <div class="container">
                 <h2 class="section-title">Design Studio</h2>
 
                 <div class="accordion">
                     <!-- Branding & Identity -->
                     <div class="accordion-item">
-                        <button class="accordion-header">
+                        <button class="accordion-header hover-trigger">
                             <span>Branding & Identity</span>
                             <svg class="accordion-icon" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg>
                         </button>
@@ -175,7 +200,7 @@
 
                     <!-- Social Media Design -->
                     <div class="accordion-item">
-                        <button class="accordion-header">
+                        <button class="accordion-header hover-trigger">
                             <span>Social Media Design</span>
                             <svg class="accordion-icon" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg>
                         </button>
@@ -190,7 +215,7 @@
 
                     <!-- Marketing Design -->
                     <div class="accordion-item">
-                        <button class="accordion-header">
+                        <button class="accordion-header hover-trigger">
                             <span>Marketing Design</span>
                             <svg class="accordion-icon" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg>
                         </button>
@@ -205,7 +230,7 @@
 
                     <!-- Web & UI Design -->
                     <div class="accordion-item">
-                        <button class="accordion-header">
+                        <button class="accordion-header hover-trigger">
                             <span>Web & UI Design</span>
                             <svg class="accordion-icon" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg>
                         </button>

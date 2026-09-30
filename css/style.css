@@ -51,7 +51,16 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: color 0.2s ease;
+    transition: color 0.2s ease, transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    position: relative;
+}
+
+.theme-toggle svg, .menu-toggle svg {
+    transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.3s ease;
+}
+
+.theme-toggle .icon-sun, .theme-toggle .icon-moon {
+    position: absolute;
 }
 
 .theme-toggle:hover, .menu-toggle:hover {
@@ -63,6 +72,8 @@ body {
     text-decoration: none;
     font-weight: 700;
     font-size: 1.5rem;
+    display: inline-block;
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 /* Container */
@@ -110,6 +121,8 @@ body {
     box-sizing: border-box;
     position: relative;
     overflow: hidden;
+    transform-style: preserve-3d;
+    perspective: 1000px;
 }
 
 /* Subtle glow effect on cards */
@@ -132,9 +145,16 @@ body {
 }
 
 .card:hover {
+    /* Base hover logic, overridden by JS if active */
     transform: translateY(-6px) scale(1.01);
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 255, 255, 0.03);
     border-color: #555;
+}
+
+/* Class applied by JS for 3D tilt */
+.card.is-tilting {
+    transition: box-shadow 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.4s ease, background 0.4s ease;
+    transform: translateY(-6px) scale(1.01) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) !important;
 }
 
 .card-header {
