@@ -84,3 +84,63 @@
         line-height: 1.5;
     }
 }
+
+/* Overlay for Intro Animation */
+#intro-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #111111;
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+    transition: opacity 1s ease-out;
+}
+
+#intro-overlay.hidden {
+    opacity: 0;
+}
+
+.intro-brand-name {
+    font-size: 3.5rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #ffffff;
+    margin: 0;
+    display: inline-flex;
+    align-items: baseline;
+    justify-content: center;
+}
+
+.intro-brand-nmol, .intro-brand-reations {
+    display: inline-block;
+    max-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    vertical-align: bottom;
+    transition: max-width 1.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.2s ease;
+}
+
+.intro-brand-name.reveal .intro-brand-nmol {
+    max-width: 4em;
+    opacity: 1;
+}
+
+.intro-brand-name.reveal .intro-brand-reations {
+    max-width: 6em;
+    opacity: 1;
+}
+
+.intro-brand-dot {
+    display: inline-block;
+    opacity: 1;
+    transition: opacity 0.2s ease;
+}
+
+.intro-brand-dot.hidden {
+    opacity: 0;
+}
