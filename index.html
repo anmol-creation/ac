@@ -6,6 +6,26 @@
     <title>anmolcreations (.ac)</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="hero/hero.css">
+    <style>
+        /* Base styles for scroll animations added directly to document to prevent flash */
+        .reveal-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+            will-change: opacity, transform;
+        }
+        .reveal-up.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .reveal-up {
+                opacity: 1;
+                transform: none;
+                transition: none;
+            }
+        }
+    </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -14,6 +34,10 @@
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
+
+    <!-- Custom Cursor (Desktop Only) -->
+    <div class="custom-cursor" id="custom-cursor"></div>
+    <div class="custom-cursor-follower" id="custom-cursor-follower"></div>
 
     <header class="header">
         <div class="container header-content" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
@@ -54,10 +78,13 @@
         </div>
 
         <!-- Section 1: Portfolio -->
-        <section class="cards-section">
+        <section class="cards-section reveal-up">
             <div class="container">
-                <a href="https://anmol-creation.github.io/portfolio/" class="card card-portfolio" style="display: block;">
-                    <h2 class="card-title">Portfolio</h2>
+                <a href="https://anmol-creation.github.io/portfolio/" class="card card-portfolio hover-trigger" style="display: block;">
+                    <div class="card-header">
+                        <h2 class="card-title">Portfolio</h2>
+                        <i data-lucide="arrow-up-right" class="card-arrow"></i>
+                    </div>
                     <p class="card-description">A collection of selected creative and digital work.</p>
                     <div class="icon-grid">
                         <div class="icon-item"><i data-lucide="brush"></i> Art</div>
@@ -72,10 +99,13 @@
         </section>
 
         <!-- Section 2: Online Digital Solutions -->
-        <section class="cards-section">
+        <section class="cards-section reveal-up">
             <div class="container">
-                <a href="solutions.html" class="card" id="card-solutions">
-                    <h2 class="card-title">Online Digital Solutions</h2>
+                <a href="solutions.html" class="card hover-trigger" id="card-solutions">
+                    <div class="card-header">
+                        <h2 class="card-title">Online Digital Solutions</h2>
+                        <i data-lucide="arrow-up-right" class="card-arrow"></i>
+                    </div>
                     <p class="card-description">Helping people access essential online services with ease.</p>
 
                     <div class="sub-card-grid">
@@ -108,12 +138,15 @@
         </section>
 
         <!-- Section 3 & 4: PromtoEngine & UT Tools -->
-        <section class="cards-section">
+        <section class="cards-section reveal-up">
             <div class="container">
                 <div class="cards-grid">
                     <!-- PromtoEngine -->
-                    <a href="https://promptoengine.netlify.app/" class="card card-promto">
-                        <h2 class="card-title">PromtoEngine</h2>
+                    <a href="https://promptoengine.netlify.app/" class="card card-promto hover-trigger">
+                        <div class="card-header">
+                            <h2 class="card-title">PromtoEngine</h2>
+                            <i data-lucide="arrow-up-right" class="card-arrow"></i>
+                        </div>
                         <p class="card-description">An AI prompt tool for creative and technical use.</p>
                         <div class="icon-grid">
                             <div class="icon-item"><i data-lucide="terminal"></i> Prompt</div>
@@ -124,8 +157,11 @@
                     </a>
 
                     <!-- UT Tools -->
-                    <a href="https://uttools.netlify.app/" class="card card-ut">
-                        <h2 class="card-title">UT Tools</h2>
+                    <a href="https://uttools.netlify.app/" class="card card-ut hover-trigger">
+                        <div class="card-header">
+                            <h2 class="card-title">UT Tools</h2>
+                            <i data-lucide="arrow-up-right" class="card-arrow"></i>
+                        </div>
                         <p class="card-description">Free utility tools for everyday digital tasks.</p>
                         <div class="icon-grid">
                             <div class="icon-item"><i data-lucide="type"></i> Text Tools</div>
@@ -139,11 +175,14 @@
         </section>
 
         <!-- Section 5: Other Projects -->
-        <section class="cards-section" id="other-projects-section">
+        <section class="cards-section reveal-up" id="other-projects-section">
             <div class="container">
                 <div class="cards-grid">
-                    <a href="https://techguidehub.vercel.app/" class="card card-techguide">
-                        <h2 class="card-title">Tech Guide Hub</h2>
+                    <a href="https://techguidehub.vercel.app/" class="card card-techguide hover-trigger">
+                        <div class="card-header">
+                            <h2 class="card-title">Tech Guide Hub</h2>
+                            <i data-lucide="arrow-up-right" class="card-arrow"></i>
+                        </div>
                         <p class="card-description">A comprehensive guide and resources for tech enthusiasts.</p>
                         <div class="icon-grid">
                             <div class="icon-item"><i data-lucide="book-open"></i> Guides</div>
@@ -152,8 +191,11 @@
                         </div>
                     </a>
 
-                    <a href="https://whatnext-ac.vercel.app/" class="card card-whatnext">
-                        <h2 class="card-title">What Next</h2>
+                    <a href="https://whatnext-ac.vercel.app/" class="card card-whatnext hover-trigger">
+                        <div class="card-header">
+                            <h2 class="card-title">What Next</h2>
+                            <i data-lucide="arrow-up-right" class="card-arrow"></i>
+                        </div>
                         <p class="card-description">Navigating career paths and finding your next big opportunity.</p>
                         <div class="icon-grid">
                             <div class="icon-item"><i data-lucide="compass"></i> Path</div>
@@ -162,8 +204,11 @@
                         </div>
                     </a>
 
-                    <a href="https://roadriders-ac.vercel.app/" class="card card-roadriders">
-                        <h2 class="card-title">RoadRiders</h2>
+                    <a href="https://roadriders-ac.vercel.app/" class="card card-roadriders hover-trigger">
+                        <div class="card-header">
+                            <h2 class="card-title">RoadRiders</h2>
+                            <i data-lucide="arrow-up-right" class="card-arrow"></i>
+                        </div>
                         <p class="card-description">A community for motorcycle enthusiasts and road trip lovers.</p>
                         <div class="icon-grid">
                             <div class="icon-item"><i data-lucide="map"></i> Routes</div>
@@ -172,8 +217,11 @@
                         </div>
                     </a>
 
-                    <a href="https://hindu-encyclopedia.netlify.app/" class="card card-hindu">
-                        <h2 class="card-title">Hindu Encyclopedia</h2>
+                    <a href="https://hindu-encyclopedia.netlify.app/" class="card card-hindu hover-trigger">
+                        <div class="card-header">
+                            <h2 class="card-title">Hindu Encyclopedia</h2>
+                            <i data-lucide="arrow-up-right" class="card-arrow"></i>
+                        </div>
                         <p class="card-description">A digital repository of Hindu literature, philosophy, and knowledge.</p>
                         <div class="icon-grid">
                             <div class="icon-item"><i data-lucide="book"></i> Scripts</div>
@@ -186,7 +234,7 @@
         </section>
 
         <!-- Section 6: Upcoming Projects -->
-        <section class="cards-section" id="upcoming-projects-section">
+        <section class="cards-section reveal-up" id="upcoming-projects-section">
             <div class="container">
                 <div class="card" style="cursor: default; transform: none; box-shadow: none;">
                     <h2 class="card-title">Upcoming Projects</h2>

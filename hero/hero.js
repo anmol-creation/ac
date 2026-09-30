@@ -25,26 +25,54 @@
         IDLE: -1       // Indefinite
     };
 
+    // Mouse Interaction for Parallax
+    let mouseX = 0;
+    let mouseY = 0;
+    let targetMouseX = 0;
+    let targetMouseY = 0;
+
+    // Parallax strength
+    const PARALLAX_FACTOR = 0.02;
+
+    container.addEventListener('mousemove', (e) => {
+        const rect = container.getBoundingClientRect();
+        targetMouseX = e.clientX - rect.left - (width / 2);
+        targetMouseY = e.clientY - rect.top - (height / 2);
+    });
+
+    container.addEventListener('mouseleave', () => {
+        targetMouseX = 0;
+        targetMouseY = 0;
+    });
+
     class Dot {
         constructor(isFirst) {
-            this.x = Math.random() * width;
-            this.y = Math.random() * height;
+            this.baseX = Math.random() * width;
+            this.baseY = Math.random() * height;
+            this.x = this.baseX;
+            this.y = this.baseY;
+            // Depth for parallax effect (closer dots move more)
+            this.z = Math.random() * 2 + 0.1;
             // Slow idle motion
             this.vx = (Math.random() - 0.5) * 0.3;
             this.vy = (Math.random() - 0.5) * 0.3;
-            this.radius = 2 + Math.random(); // 2-3px
+            this.radius = (2 + Math.random()) * (this.z * 0.5 + 0.5); // size relative to depth
             this.baseColor = isFirst ? '#ffffff' : COLORS[Math.floor(Math.random() * (COLORS.length - 1)) + 1];
             this.color = this.baseColor;
             this.alpha = 1;
         }
 
         update() {
-            this.x += this.vx;
-            this.y += this.vy;
+            this.baseX += this.vx;
+            this.baseY += this.vy;
 
-            // Soft bounce
-            if (this.x < 0 || this.x > width) this.vx *= -1;
-            if (this.y < 0 || this.y > height) this.vy *= -1;
+            // Soft bounce based on base coordinates
+            if (this.baseX < 0 || this.baseX > width) this.vx *= -1;
+            if (this.baseY < 0 || this.baseY > height) this.vy *= -1;
+
+            // Apply parallax offset
+            this.x = this.baseX + (mouseX * PARALLAX_FACTOR * this.z);
+            this.y = this.baseY + (mouseY * PARALLAX_FACTOR * this.z);
         }
 
         draw(ctx) {
@@ -87,6 +115,10 @@
 
     function animate() {
         ctx.clearRect(0, 0, width, height);
+
+        // Smooth mouse following for parallax
+        mouseX += (targetMouseX - mouseX) * 0.1;
+        mouseY += (targetMouseY - mouseY) * 0.1;
 
         // Update Phase
         if (phase !== 'idle') {
